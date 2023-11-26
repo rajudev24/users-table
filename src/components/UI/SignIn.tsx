@@ -1,25 +1,23 @@
 import { BiLogoApple, BiSolidLockAlt } from "react-icons/bi";
 import { Link, useNavigate } from "react-router-dom";
-import { Input, Checkbox, Button } from "antd";
-import { useState } from "react";
-import { IRegSignData } from "./Signup";
+import { Button, Checkbox, Form, Input } from "antd";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useLoginUserMutation } from "../../redux/api/userApiSlice";
 
+type FieldData = {
+  email?: string;
+  password?: string;
+  remember?: string;
+};
 export default function SignIn() {
   const [logUser] = useLoginUserMutation();
-  const [data, setData] = useState<IRegSignData>({
-    email: "",
-    password: "",
-  });
   const navigate = useNavigate();
 
-  const handleFormSubmit = async (e: { preventDefault: () => void }) => {
-    e.preventDefault();
-    const user: IRegSignData = {
-      email: data.email,
-      password: data.password,
+  const onFinish = async (values: FieldData) => {
+    const user = {
+      email: values.email || "",
+      password: values.password || "",
     };
     try {
       const resultAction = await logUser(user);
@@ -36,6 +34,7 @@ export default function SignIn() {
       console.error("Login failed:", error);
     }
   };
+
   return (
     <div className="flex  justify-center items-center">
       <div className="text-center">
@@ -53,43 +52,47 @@ export default function SignIn() {
         <div className="flex justify-center text-[#B0B7C3] mt-2">
           <hr className="w-48 mt-3 mr-2" /> OR <hr className="w-48 mt-3 ml-2" />
         </div>
-        <div>
-          <Input
-            className="h-10 my-5 border-2 w-4/4"
-            placeholder="@ Your Email"
-            type="email"
-            value={data.email}
-            onChange={(e) => setData({ ...data, email: e.target.value })}
-            required
-          />
-
-          <Input.Password
-            className="h-10 my-5 border-2 w-4/4"
-            placeholder="Create Password"
-            prefix={<BiSolidLockAlt className="text-[#C1C7D0] " />}
-            type="password"
-            required
-            value={data.password}
-            onChange={(e) => setData({ ...data, password: e.target.value })}
-          />
-        </div>
-        <div className="flex justify-between w-full items-center ">
-          <hr className="w-12 border-2 mr-2 border-[#38CB89] rounded-md" />{" "}
-          <hr className="w-12 mr-2 border-2 border-[#38CB89] rounded-md" />{" "}
-          <hr className="w-12 mr-2 border-2 border-[#38CB89] rounded-md" />{" "}
-          <hr className="w-12 mr-2 border-2 border-[#38CB89] rounded-md" />{" "}
-          <hr className="w-12 mr-2 border-2 border-[#38CB89] rounded-md" />{" "}
-          <hr className="w-12 border-2 rounded-md" />
-        </div>
-        <div className="text-start my-4  ">
-          <Checkbox className="text-[#B0B7C3]">Remember Me</Checkbox>
-        </div>
-        <Button
-          onClick={handleFormSubmit}
-          className=" bg-[#377DFF] w-full h-10 text-lg text-white hover:bg-white"
+        <Form
+          name="basic"
+          layout="vertical"
+          initialValues={{ remember: true }}
+          onFinish={onFinish}
+          autoComplete="off"
         >
-          Sign In
-        </Button>
+          <Form.Item<FieldData>
+            className=" text-left"
+            name="email"
+            rules={[{ required: true, message: "Please input your email!" }]}
+          >
+            <Input className="h-10 rounded-xl" placeholder="@ Your Email" />
+          </Form.Item>
+
+          <Form.Item<FieldData>
+            className=" mb-2 text-left"
+            name="password"
+            rules={[{ required: true, message: "Please input your password!" }]}
+          >
+            <Input.Password
+              className="h-10 rounded-xl"
+              placeholder="Create Password"
+              prefix={<BiSolidLockAlt className="text-[#C1C7D0] " />}
+            />
+          </Form.Item>
+
+          <Form.Item<FieldData> name="remember" className="text-left ">
+            <Checkbox className="text-[#B0B7C3]"> Remember Me</Checkbox>
+          </Form.Item>
+
+          <Form.Item>
+            <Button
+              className=" bg-[#377DFF] w-full h-10 text-lg text-white hover:bg-white"
+              type="primary"
+              htmlType="submit"
+            >
+              Sign Up
+            </Button>
+          </Form.Item>
+        </Form>
 
         <div className="m-4">
           Don’t have an account yet?{" "}

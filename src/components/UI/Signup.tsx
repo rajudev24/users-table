@@ -1,27 +1,39 @@
 import { BiLogoApple, BiSmile, BiSolidLockAlt } from "react-icons/bi";
 import { Link, useNavigate } from "react-router-dom";
-import { Input, Checkbox, Button } from "antd";
 import { useState } from "react";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useRegisterUserMutation } from "../../redux/api/userApiSlice";
+import PasswordStrengthBar from "react-password-strength-bar";
+import { Button, Checkbox, Form, Input } from "antd";
 
 export type IRegSignData = {
-  email: string;
-  password: string;
+  email?: string;
+  password?: string;
+};
+type FieldData = {
+  email?: string;
+  name?: string;
+  password?: string;
+  remember?: string;
 };
 export default function Signup() {
   const [regUser] = useRegisterUserMutation();
-  const [data, setData] = useState<IRegSignData>({
+  const navigate = useNavigate();
+  const [data, setData] = useState<FieldData>({
     email: "",
     password: "",
+    name: "",
   });
-  const navigate = useNavigate();
-  const handleFormSubmit = async (e: { preventDefault: () => void }) => {
-    e.preventDefault();
-    const user: IRegSignData = {
-      email: data.email,
-      password: data.password,
+
+  const handlePasswordChange = (password: string) => {
+    setData((prevData) => ({ ...prevData, password }));
+  };
+  const onFinish = async (values: FieldData) => {
+    setData(values);
+    const user = {
+      email: values.email || "",
+      password: values.password || "",
     };
     try {
       const resultAction = await regUser(user);
@@ -60,51 +72,67 @@ export default function Signup() {
           <hr className="w-48 mt-3 mr-2" /> OR <hr className="w-48 mt-3 ml-2" />
         </div>
 
-        <div>
-          <Input
-            className="h-10 my-5 border-2 w-3/4"
-            placeholder="@ Your Email"
-            type="email"
-            value={data.email}
-            onChange={(e) => setData({ ...data, email: e.target.value })}
-            required
-          />
-          <Input
-            className="h-10 border-2 w-3/4"
-            placeholder="Your Name"
-            prefix={<BiSmile className="text-[#C1C7D0]" />}
-            type="text"
-          />
-
-          <Input.Password
-            className="h-10 my-5 border-2 w-3/4"
-            placeholder="Create Password"
-            prefix={<BiSolidLockAlt className="text-[#C1C7D0] " />}
-            type="password"
-            required
-            value={data.password}
-            onChange={(e) => setData({ ...data, password: e.target.value })}
-          />
-        </div>
-        <div className="flex justify-between w-3/4 items-center ml-20">
-          <hr className="w-12 border-2 mr-2 border-[#38CB89] rounded-md" />{" "}
-          <hr className="w-12 mr-2 border-2 border-[#38CB89] rounded-md" />{" "}
-          <hr className="w-12 mr-2 border-2 border-[#38CB89] rounded-md" />{" "}
-          <hr className="w-12 mr-2 border-2 border-[#38CB89] rounded-md" />{" "}
-          <hr className="w-12 mr-2 border-2 border-[#38CB89] rounded-md" />{" "}
-          <hr className="w-12 border-2 rounded-md" />
-        </div>
-        <div className="text-start my-4 ml-20  ">
-          <Checkbox className="text-[#B0B7C3]">
-            I agree to the Terms & Conditions
-          </Checkbox>
-        </div>
-        <Button
-          onClick={handleFormSubmit}
-          className=" bg-[#377DFF] w-3/4 h-10 text-lg text-white hover:bg-white"
+        <Form
+          name="basic"
+          layout="vertical"
+          initialValues={{ remember: true }}
+          onFinish={onFinish}
+          autoComplete="off"
         >
-          Sign Up
-        </Button>
+          <Form.Item<FieldData>
+            className="text-left "
+            name="email"
+            rules={[
+              {
+                required: true,
+                message: "Please enter a vaild email address!",
+              },
+            ]}
+          >
+            <Input className="h-10 rounded-xl" placeholder="@ Your Email" />
+          </Form.Item>
+          <Form.Item<FieldData>
+            className="text-left"
+            name="name"
+            rules={[{ required: true, message: "Please enter your name!" }]}
+          >
+            <Input
+              className="h-10 rounded-xl"
+              placeholder="Your Name"
+              prefix={<BiSmile className="text-[#C1C7D0] " />}
+            />
+          </Form.Item>
+
+          <Form.Item<FieldData>
+            className="text-left"
+            name="password"
+            rules={[{ required: true, message: "Please enter your password!" }]}
+          >
+            <Input.Password
+              onChange={(e) => handlePasswordChange(e.target.value)}
+              className="h-10 rounded-xl"
+              placeholder="Create Password"
+              prefix={<BiSolidLockAlt className="text-[#C1C7D0] " />}
+            />
+          </Form.Item>
+          <PasswordStrengthBar shortScoreWord={true} password={data.password} />
+
+          <Form.Item<FieldData> name="remember" className="text-left my-3">
+            <Checkbox className="text-[#B0B7C3]">
+              I agree to the Terms & Conditions
+            </Checkbox>
+          </Form.Item>
+
+          <Form.Item>
+            <Button
+              className=" bg-[#377DFF] w-full h-10 text-lg text-white hover:bg-white"
+              type="primary"
+              htmlType="submit"
+            >
+              Sign Up
+            </Button>
+          </Form.Item>
+        </Form>
 
         <div className="m-4">
           Already have an account?{" "}
